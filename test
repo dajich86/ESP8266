@@ -1,0 +1,56 @@
+const char HTTP_PAGEDUCKDNSSETTINGS[] PROGMEM = "<h2>Settings</h2><script>function validate(e){var n='';return(isNaN(e.elements.n.value)||!(parseInt(e.elements.n.value)>=0&&parseInt(e.elements.n.value)<=999))&&(n+='Invalid Device ID, must be a number between 0 and 999. '),e.elements.d.value.length>=1&&e.elements.d.value.length<=64||(n+='Invalid Domain, max 64 characters. '),e.elements.t.value.length>=1&&e.elements.t.value.length<=36||(n+='Invalid Token, max 36 characters. '),(isNaN(e.elements.u.value)||!(parseInt(e.elements.u.value)>=1&&parseInt(e.elements.u.value)<=99))&&(n+='Invalid Update interval, must be a number between 0 and 99. '),''!=n?(alert(n),!1):void 0}</script><form method='get' onsubmit='return validate(this);' action='settings'><p><label>Device ID</label><input type='text' id='n' name='n' length=3 value='{n}'/></p><p><label>Domain</label><input type='text' id='d' name='d' length=64 value='{d}'/></p><p><label>Token</label><input type='text' id='t' name='t' length=36 value='{t}'/></p><p><label>Update interval</label><input type='text' id='u' name='u' length=3 value='{u}'/></p><p><label>Reset WiFi settings</label><input type='checkbox' id='r' name='r' value='1'/></p><br/><input type='hidden' id='b' name='b' value='1'/><button type='submit'>save</button></form>";
+
+//ddnsConfig
+struct ddnsConfig
+{
+  char domain[65];
+  char token[37];
+} ddnsConfiguration;
+
+if (server.arg("d") != "") {
+    domain = server.arg("d");
+    if(domain.length() < sizeof(ddnsConfiguration.domain)/sizeof(ddnsConfiguration.domain[0]))
+      strcpy(ddnsConfiguration.domain, domain.c_str());
+  }
+if (server.arg("t") != "") {
+    token = server.arg("t");
+    if(token.length() < sizeof(ddnsConfiguration.token)/sizeof(ddnsConfiguration.token[0]))
+      strcpy(ddnsConfiguration.token, token.c_str());
+
+//eeprom update
+  ddnsEEPROMwrite();
+
+  //get vars
+  ddnsEEPROMread(); 
+
+domain = String(ddnsConfiguration.domain);
+token = String(ddnsConfiguration.token);       
+
+//ddns eeprom read
+void ddnsEEPROMinit() {
+  EEPROM.begin(512);
+  delay(10);
+  ddnsEEPROMread();
+  if(ddnsConfiguration.initialized != 0x10) {
+#if defined SERIAL_ENABLED
+    Serial.println("Initialize eeprom");
+#endif
+    ddnsConfiguration.initialized = 0x10;
+    ddnsConfiguration.deviceid = 1;
+    strcpy(ddnsConfiguration.domain, "domain");
+    strcpy(ddnsConfiguration.token, "token");
+    ddnsConfiguration.updateinterval = 10;
+    ddnsEEPROMwrite();
+  }
+}
+
+//ddns eeprom read
+void ddnsEEPROMread() {
+  EEPROM.get(0, ddnsConfiguration);
+}
+
+//ddns eeprom write
+void ddnsEEPROMwrite() {
+  EEPROM.put(0, ddnsConfiguration);
+  EEPROM.commit();
+}
