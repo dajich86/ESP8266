@@ -68,7 +68,7 @@ mainPage += "        <a href=\'socket8Off\'><button type='button' class='btn btn
 mainPage += "      </div>";
 mainPage += "    </div>";
 mainPage += "    <hr>";
-mainPage += "  <h3 class ='text-left'>Todas</h3> ";
+mainPage += "  <h3 class ='text-left'>Todos</h3> ";
 mainPage += "      <a href=\'allOn\'><button type='button' class='btn btn-success btn-lg btn-block'>Encender</button></a>";
 mainPage += "  <h6 class='text-center'></h6>";
 mainPage += "      <a href=\'allOff\'><button type='button' class='btn btn-danger btn-lg btn-block'>Apagar</button></a>";
