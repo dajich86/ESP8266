@@ -259,10 +259,13 @@ setupPage += "</html>";
   String var3 =")";
   String IPstring = var1 + var2 + var3;
   char APshowIP[45] = "";
-  char psw[16] = "youshallnotpass";  
   IPstring.toCharArray(APshowIP, 45);
-  WiFi.softAP(APshowIP,psw);
-  WiFi.mode(WIFI_AP_STA);
+  
+  WiFi.softAPdisconnect(true);//desconecta al usuario
+  WiFi.mode(WIFI_OFF);//apaga wifi por 3 segundos
+  delay(3000);//incrementar este tiempo si acaso no se desconecta del AP de configuracion
+  WiFi.softAP(APshowIP, "pass-to-soft-AP");//crea mismo AP pero con seguridad para evitar reconexion abierta en vez de internet local
+  WiFi.mode(WIFI_AP_STA);//inicia en modo STA y AP permanentemente
 }
  
 void loop(void){
