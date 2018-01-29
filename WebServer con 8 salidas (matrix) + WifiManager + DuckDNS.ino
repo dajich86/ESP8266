@@ -17,8 +17,9 @@ int gpio2_pin = 2;
 //////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////
 void setup(void){
+WiFi.hostname("reef-controller");
 WiFiManager wifiManager;
-wifiManager.autoConnect("REEF Controller Setup");
+wifiManager.autoConnect("REEF Setup (IP: 192.168.4.1)");// se desborda y no pone el nombre
   
 mainPage += "<!DOCTYPE html>";
 mainPage += "<html lang='en'>";
@@ -252,6 +253,16 @@ setupPage += "</html>";
   //DDNS DuckDNS
   EasyDDNS.service("duckdns");    // Enter your DDNS Service Name - "duckdns" / "noip"
   EasyDDNS.client("dajich.duckdns.org","3c08f8d5-d76f-49ac-903a-67486cc1de61");    // Enter ddns Domain & Token | Example - "esp.duckdns.org","1234567"
+  
+  String var1 ="REEF Controller (IP: ";
+  String var2 = WiFi.localIP().toString();
+  String var3 =")";
+  String IPstring = var1 + var2 + var3;
+  char APshowIP[45] = "";
+  char psw[16] = "youshallnotpass";  
+  IPstring.toCharArray(APshowIP, 45);
+  WiFi.softAP(APshowIP,psw);
+  WiFi.mode(WIFI_AP_STA);
 }
  
 void loop(void){
@@ -291,5 +302,3 @@ void handleRoot() {
     server.send(200, "text/html", setupPage);
   }
 }
-
-
