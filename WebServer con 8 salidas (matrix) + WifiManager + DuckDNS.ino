@@ -263,9 +263,10 @@ setupPage += "</html>";
   
   WiFi.softAPdisconnect(true);//desconecta al usuario
   WiFi.mode(WIFI_OFF);//apaga wifi por 3 segundos
-  delay(3000);//incrementar este tiempo si acaso no se desconecta del AP de configuracion
+  delay(1000);//incrementar este tiempo si acaso no se desconecta del AP de configuracion
   WiFi.softAP(APshowIP, "pass-to-soft-AP");//crea mismo AP pero con seguridad para evitar reconexion abierta en vez de internet local
   WiFi.mode(WIFI_AP_STA);//inicia en modo STA y AP permanentemente
+  WiFi.begin();
 }
  
 void loop(void){
