@@ -26,8 +26,8 @@ void setup(void){
   
 WiFi.hostname("reef-controller");
 WiFiManager wifiManager;
-//wifiManager.autoConnect("REEF Setup (IP: 192.168.4.1)");// se desborda y no pone el nombre
-wifiManager.autoConnect("REEF Controller Setup");
+wifiManager.autoConnect("REEF Setup (IP: 192.168.4.1)");// se desborda y no pone el nombre
+//wifiManager.autoConnect("REEF Controller Setup");
   
 mainPage += "<!DOCTYPE html>";
 mainPage += "<html lang='en'>";
