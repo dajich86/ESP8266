@@ -122,9 +122,7 @@ setupPage += "</form>";
 setupPage += "</body>";
 setupPage += "</html>";
   
-   server.on("/", [](){
-    server.send(200, "text/html", mainPage);
-  });
+   server.on("/", handleSave);
   //////////////////////////////////////////////
   server.on("/socket1On", [](){
     server.send(200, "text/html", mainPage);
@@ -236,9 +234,7 @@ setupPage += "</html>";
   //setup page
   server.on("/setup", [](){
     server.send(200, "text/html", setupPage);
-    handleSetup();
   });
-  //server.on("/setup", handleSetup);
   
   server.begin();
   //DDNS DuckDNS
@@ -325,7 +321,14 @@ void write_to_Memory(String d,String t)
   EEPROM.commit();
   }
 
-void handleSetup() {
-    //server.send(200, "text/html", setupPage);
+void handleSave() {
+    if (server.hasArg("domain")&& server.hasArg("token")) 
+    {//If all form fields contain data call handelSubmit()
     write_to_Memory(String(server.arg("domain")),String(server.arg("token")));
+    server.send(200, "text/html", mainPage);
+    }
+    else 
+    {//Redisplay the form
+    server.send(200, "text/html", mainPage);
+    }
 }
