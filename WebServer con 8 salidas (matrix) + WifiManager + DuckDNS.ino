@@ -10,13 +10,20 @@ ESP8266WebServer server(80);
 String mainPage = "";
 String setupPage = "";
 
-int gpio0_pin = 0;
-int gpio2_pin = 2;
-
-
-//////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////
 void setup(void){
+  EEPROM.begin(512);
+  // preparing GPIOs
+  pinMode(16, OUTPUT);
+  pinMode(5, OUTPUT);
+  pinMode(4, OUTPUT);
+  pinMode(0, OUTPUT);
+  pinMode(2, OUTPUT);
+  pinMode(14, OUTPUT);
+  pinMode(12, OUTPUT);
+  pinMode(13, OUTPUT);
+  init_outs();
+  
 WiFi.hostname("reef-controller");
 WiFiManager wifiManager;
 wifiManager.autoConnect("REEF Setup (IP: 192.168.4.1)");// se desborda y no pone el nombre
@@ -116,139 +123,120 @@ setupPage += "</form>";
 setupPage += "</body>";
 setupPage += "</html>";
   
-  // preparing GPIOs
-  pinMode(16, OUTPUT);
-  digitalWrite(16, LOW);
-  pinMode(5, OUTPUT);
-  digitalWrite(5, LOW);
-  pinMode(4, OUTPUT);
-  digitalWrite(4, LOW);
-  pinMode(0, OUTPUT);
-  digitalWrite(0, LOW);
-  pinMode(2, OUTPUT);
-  digitalWrite(2, LOW);
-  pinMode(14, OUTPUT);
-  digitalWrite(14, LOW);
-  pinMode(12, OUTPUT);
-  digitalWrite(12, LOW);
-  pinMode(13, OUTPUT);
-  digitalWrite(13, LOW);
-
-  delay(500);
-  
    server.on("/", [](){
     server.send(200, "text/html", mainPage);
   });
   //////////////////////////////////////////////
   server.on("/socket1On", [](){
     server.send(200, "text/html", mainPage);
-    digitalWrite(16, LOW);
-    delay(1000);
+    salida_on(1);
+    delay(500);
   });
   server.on("/socket1Off", [](){
     server.send(200, "text/html", mainPage);
-    digitalWrite(16, HIGH);
-    delay(1000); 
+    salida_off(1);
+    delay(500);
   });
   server.on("/socket2On", [](){
     server.send(200, "text/html", mainPage);
-    digitalWrite(5, LOW);
-    delay(1000);
+    salida_on(2);
+    delay(500);
   });
   server.on("/socket2Off", [](){
     server.send(200, "text/html", mainPage);
-    digitalWrite(5, HIGH);
-    delay(1000); 
+    salida_off(2);
+    delay(500);
   });
 
   server.on("/socket3On", [](){
     server.send(200, "text/html", mainPage);
-    digitalWrite(4, LOW);
-    delay(1000);
+    salida_on(3);
+    delay(500);
   });
   server.on("/socket3Off", [](){
     server.send(200, "text/html", mainPage);
-    digitalWrite(4, HIGH);
-    delay(1000); 
+    salida_off(3);
+    delay(500);
   });
   server.on("/socket4On", [](){
     server.send(200, "text/html", mainPage);
-    digitalWrite(0, LOW);
-    delay(1000);
+    salida_on(4);
+    delay(500);
   });
   server.on("/socket4Off", [](){
     server.send(200, "text/html", mainPage);
-    digitalWrite(0, HIGH);
-    delay(1000); 
+    salida_off(4);
+    delay(500);
   });
     server.on("/socket5On", [](){
     server.send(200, "text/html", mainPage);
-    digitalWrite(2, LOW);
-    delay(1000);
+    salida_on(5);
+    delay(500);
   });
   server.on("/socket5Off", [](){
     server.send(200, "text/html", mainPage);
-    digitalWrite(2, HIGH);
-    delay(1000); 
+    salida_off(5);
+    delay(500);
   });
     server.on("/socket6On", [](){
     server.send(200, "text/html", mainPage);
-    digitalWrite(14, LOW);
-    delay(1000);
+    salida_on(6);
+    delay(500);
   });
   server.on("/socket6Off", [](){
     server.send(200, "text/html", mainPage);
-    digitalWrite(14, HIGH);
-    delay(1000); 
+    salida_off(6);
+    delay(500); 
   });
     server.on("/socket7On", [](){
     server.send(200, "text/html", mainPage);
-    digitalWrite(12, LOW);
-    delay(1000);
+    salida_on(7);
+    delay(500);
   });
   server.on("/socket7Off", [](){
     server.send(200, "text/html", mainPage);
-    digitalWrite(12, HIGH);
-    delay(1000); 
+    salida_off(7);
+    delay(500);
   });
     server.on("/socket8On", [](){
     server.send(200, "text/html", mainPage);
-    digitalWrite(13, LOW);
-    delay(1000);
+    salida_on(8);
+    delay(500);
   });
   server.on("/socket8Off", [](){
     server.send(200, "text/html", mainPage);
-    digitalWrite(13, HIGH);
-    delay(1000); 
+    salida_off(8);
+    delay(500);
   });
 
   server.on("/allOn", [](){
     server.send(200, "text/html", mainPage);   
-    digitalWrite(16, LOW);
-    digitalWrite(5, LOW);
-    digitalWrite(4, LOW);
-    digitalWrite(0, LOW);
-    digitalWrite(2, LOW);
-    digitalWrite(14, LOW);
-    digitalWrite(12, LOW);
-    digitalWrite(13, LOW);
-    delay(1000);
+    salida_on(1);
+    salida_on(2);
+    salida_on(3);
+    salida_on(4);
+    salida_on(5);
+    salida_on(6);
+    salida_on(7);
+    salida_on(8);
+    delay(500);
   });
   server.on("/allOff", [](){
     server.send(200, "text/html", mainPage);
-    digitalWrite(16, HIGH);
-    digitalWrite(5, HIGH);
-    digitalWrite(4, HIGH);
-    digitalWrite(0, HIGH);
-    digitalWrite(2, HIGH);
-    digitalWrite(14, HIGH);
-    digitalWrite(12, HIGH);
-    digitalWrite(13, HIGH);
-    delay(1000); 
+    salida_off(1);
+    salida_off(2);
+    salida_off(3);
+    salida_off(4);
+    salida_off(5);
+    salida_off(6);
+    salida_off(7);
+    salida_off(8);
+    delay(500); 
   });
   ////////////////////////////////////////////
   //setup page
-  server.on("/setup", handleRoot);
+  //server.on("/setup", handleRoot );
+  
   server.begin();
   //DDNS DuckDNS
   EasyDDNS.service("duckdns");    // Enter your DDNS Service Name - "duckdns" / "noip"
@@ -274,35 +262,45 @@ void loop(void){
   server.handleClient();
 }
 
-
-void write_EEPROM(String x,int pos)
-{
-    for(int n=pos;n<x.length()+pos;n++)
-    {
-      EEPROM.write(n,x[n-pos]);
-    }
-    EEPROM.commit();
-  }
-
-void write_to_Memory(String d,String t)
-{
-  d+=";";
-  write_EEPROM(d,0);
-  t+=";";
-  write_EEPROM(t,50);
-  EEPROM.commit();
-  }
-
-void handleSubmit()
-  {
-   write_to_Memory(String(server.arg("domain")),String(server.arg("token")));
-  } 
-
-void handleRoot() {
-   if (server.hasArg("domain")&& server.hasArg("token")) {//If all form fields contain data call handelSubmit()
-    handleSubmit();
-  }
-  else {//Redisplay the form
-    server.send(200, "text/html", setupPage);
-  }
+void init_outs(){
+    char x = EEPROM.read(0);
+    digitalWrite(16, bitRead(x, 0));
+    digitalWrite(5, bitRead(x, 1));
+    digitalWrite(4, bitRead(x, 2));
+    digitalWrite(0, bitRead(x, 3));
+    digitalWrite(2, bitRead(x, 4));
+    digitalWrite(14, bitRead(x, 5));
+    digitalWrite(12, bitRead(x, 6));
+    digitalWrite(13, bitRead(x, 7));
 }
+
+void salida_on(char pin){
+    char x = EEPROM.read(0);
+    switch(pin){
+      case 1: digitalWrite(16, 0); bitClear(x,0); EEPROM.write(0,x); EEPROM.commit(); break;
+      case 2: digitalWrite(5,  0); bitClear(x,1); EEPROM.write(0,x); EEPROM.commit(); break;
+      case 3: digitalWrite(4,  0); bitClear(x,2); EEPROM.write(0,x); EEPROM.commit(); break;
+      case 4: digitalWrite(0,  0); bitClear(x,3); EEPROM.write(0,x); EEPROM.commit(); break;
+      case 5: digitalWrite(2,  0); bitClear(x,4); EEPROM.write(0,x); EEPROM.commit(); break;
+      case 6: digitalWrite(14, 0); bitClear(x,5); EEPROM.write(0,x); EEPROM.commit(); break;
+      case 7: digitalWrite(12, 0); bitClear(x,6); EEPROM.write(0,x); EEPROM.commit(); break;
+      case 8: digitalWrite(13, 0); bitClear(x,7); EEPROM.write(0,x); EEPROM.commit(); break;
+      default: break;
+    }
+}
+
+void salida_off(char pin){
+    char x = EEPROM.read(0);
+    switch(pin){
+      case 1: digitalWrite(16, 1); bitSet(x,0); EEPROM.write(0,x); EEPROM.commit(); break;
+      case 2: digitalWrite(5,  1); bitSet(x,1); EEPROM.write(0,x); EEPROM.commit(); break;
+      case 3: digitalWrite(4,  1); bitSet(x,2); EEPROM.write(0,x); EEPROM.commit(); break;
+      case 4: digitalWrite(0,  1); bitSet(x,3); EEPROM.write(0,x); EEPROM.commit(); break;
+      case 5: digitalWrite(2,  1); bitSet(x,4); EEPROM.write(0,x); EEPROM.commit(); break;
+      case 6: digitalWrite(14, 1); bitSet(x,5); EEPROM.write(0,x); EEPROM.commit(); break;
+      case 7: digitalWrite(12, 1); bitSet(x,6); EEPROM.write(0,x); EEPROM.commit(); break;
+      case 8: digitalWrite(13, 1); bitSet(x,7); EEPROM.write(0,x); EEPROM.commit(); break;
+      default: break;
+    }
+}
+
