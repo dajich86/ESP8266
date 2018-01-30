@@ -26,7 +26,8 @@ void setup(void){
   
 WiFi.hostname("reef-controller");
 WiFiManager wifiManager;
-wifiManager.autoConnect("REEF Setup (IP: 192.168.4.1)");// se desborda y no pone el nombre
+//wifiManager.autoConnect("REEF Setup (IP: 192.168.4.1)");// se desborda y no pone el nombre
+wifiManager.autoConnect("REEF Controller Setup");
   
 mainPage += "<!DOCTYPE html>";
 mainPage += "<html lang='en'>";
@@ -88,8 +89,6 @@ mainPage += "</div>";
 mainPage += "</body>";
 mainPage += "</html>";
 
-
-
 setupPage += "<!DOCTYPE html>";
 setupPage += "<html lang='en'>";
 setupPage += "<head>";
@@ -104,7 +103,7 @@ setupPage += "<body>";
 setupPage += "<div class= 'well' 'jumbotron'>";
 setupPage += "    <h1 class='text-center'>DNS</h1>";
 setupPage += "    <h3></h3>";
-setupPage += "    <form action='/' method='post'>";//aqui esta la clave para enviar a guardar los datos
+setupPage += "    <form action='/' method='GET'>";//aqui esta la clave para enviar a guardar los datos
 setupPage += "    <div class='input-group'>";
 setupPage += "      <span class='input-group-addon'><i class='glyphicon glyphicon-user'></i></span>";
 setupPage += "      <input maxlength='30' type='text' class='form-control' name='domain' placeholder='daniel'>";
@@ -235,7 +234,11 @@ setupPage += "</html>";
   });
   ////////////////////////////////////////////
   //setup page
-  //server.on("/setup", handleRoot );
+  server.on("/setup", [](){
+    server.send(200, "text/html", setupPage);
+    handleSetup();
+  });
+  //server.on("/setup", handleSetup);
   
   server.begin();
   //DDNS DuckDNS
@@ -251,7 +254,7 @@ setupPage += "</html>";
   
   WiFi.softAPdisconnect(true);//desconecta al usuario
   WiFi.mode(WIFI_OFF);//apaga wifi por 3 segundos
-  delay(1000);//incrementar este tiempo si acaso no se desconecta del AP de configuracion
+  delay(2000);//incrementar este tiempo si acaso no se desconecta del AP de configuracion
   WiFi.softAP(APshowIP, "pass-to-soft-AP");//crea mismo AP pero con seguridad para evitar reconexion abierta en vez de internet local
   WiFi.mode(WIFI_AP_STA);//inicia en modo STA y AP permanentemente
   WiFi.begin();
@@ -303,4 +306,26 @@ void salida_off(char pin){
       default: break;
     }
 }
+////////////////////SETUP DNS
+void write_EEPROM(String x,int pos)
+{
+    for(int n=pos;n<x.length()+pos;n++)
+    {
+      EEPROM.write(n,x[n-pos]);
+    }
+    EEPROM.commit();
+  }
 
+void write_to_Memory(String d,String t)
+{
+  d+=";";
+  write_EEPROM(d,1);
+  t+=";";
+  write_EEPROM(t,32);
+  EEPROM.commit();
+  }
+
+void handleSetup() {
+    //server.send(200, "text/html", setupPage);
+    write_to_Memory(String(server.arg("domain")),String(server.arg("token")));
+}
