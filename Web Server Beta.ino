@@ -9,15 +9,14 @@ ESP8266WebServer server(80);
 
 String mainPage = "";
 String setupPage = "";
-char mySsid1[] = "REEF Setup (IP: 192.168.4.1)";
-char APpass[] = "12345678";
-
+char APpass[] = "1234abcd";
 const char* www_username = "reefacuario";//sitio web protegido por usuario y password
-const char* www_password = "ingemamadas";
+const char* www_password = "qwerty";
 char memoria;
+char flag_1 = 0;
 
 
-IPAddress ip(192,168,4,1);//este nombre puede ser cualquiera no es una funcion fija ip-IP-ipe-ip1 es del AP
+IPAddress ip(192,168,1,4);//este nombre puede ser cualquiera no es una funcion fija ip-IP-ipe-ip1 es del AP
 IPAddress gateway(192,168,11,1);
 IPAddress subnet(255,255,255,0);
 
@@ -62,8 +61,8 @@ const char HTTP_BUTTON_DNS[] PROGMEM = "<a href=\'setup\'><button type='button' 
 const char HTTP_END1[] PROGMEM = "</div></body></html>";
 
 void pageHome() {
-  if(!server.authenticate(www_username, www_password))
-      return server.requestAuthentication();
+  //if(!server.authenticate(www_username, www_password))//estas 2 lineas son para proteger con password el acceso al servidor
+  //    return server.requestAuthentication();
   
   if (server.hasArg("domain")&& server.hasArg("token")) 
   {//If all form fields contain data call handelSubmit()
@@ -108,10 +107,10 @@ String page() {
     }
 
 
-/////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////S E T U P///////////////////////////////////////////////////////////////////////////////////////////////////////
 void setup(void){
   EEPROM.begin(512);
-  // preparing GPIOs
+
   pinMode(salida_1, OUTPUT);
   pinMode(salida_2, OUTPUT);
   pinMode(salida_3, OUTPUT);
@@ -120,12 +119,25 @@ void setup(void){
   pinMode(salida_6, OUTPUT);
   pinMode(salida_7, OUTPUT);
   pinMode(salida_8, OUTPUT);
+  pinMode(3, INPUT_PULLUP);//entrada de boton para borrar ejecutar WiFi.disconnect(); y borrar red guardada
+
+  if(digitalRead(3) == LOW )
+  {
+    WiFi.disconnect();//borra wifi guardada
+    EEPROM.write(0,0); //all on
+    EEPROM.commit();
+    delay(5000);
+    while(digitalRead(3) == LOW);
+    ESP.reset();
+  }
+  
   memoria = EEPROM.read(0);
   init_outs();
-//////////////////////////////////////////////B O R R A R    D A T O S   P R E V I O S///////////////////////////////////////////////////////////////////////////////////////
-//WiFi.disconnect(); //will erase ssid/password segun tzapu autor de la libreria wifi manager
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////B O R R A R    D A T O S   P R E V I O S////////////////
+//WiFi.disconnect(); //will erase ssid/password segun tzapu autor de la libreria wifi manager//////////
+//////////////////////////////////////////////////////////////////////////////////////////////////////
 WiFi.hostname("reef-controller");
+//WiFi.softAPConfig(ip, gateway, subnet);
 WiFi.mode(WIFI_AP_STA);  
 WiFiManager wifiManager;
 wifiManager.autoConnect("REEF Setup (IP: 192.168.4.1)");// se desborda y no pone el nombre
@@ -283,17 +295,19 @@ setupPage += "</html>";
   EasyDDNS.service("duckdns");    // Enter your DDNS Service Name - "duckdns" / "noip"
   EasyDDNS.client("dajich.duckdns.org","3c08f8d5-d76f-49ac-903a-67486cc1de61");    // Enter ddns Domain & Token | Example - "esp.duckdns.org","1234567"
 }
-///////////////////////////L O O P////////////////////////////////////////// 
-void loop(void){
+///////////////////////////////////////////////////////////L O O P////////////////////////////////////////////////////////////////////////// 
+void loop(void)
+{
   EasyDDNS.update(300000); // 1000 = 1 segundo
   server.handleClient();
- //button_init();//funcion tomada de libreria de blynk
+  
   if(WiFi.status()==WL_CONNECTED)//con conexion wifi muestra nombre y la IP que se obtuvo
   {
-    show_IP();
+    if(flag_1 == 0)
+      show_IP();
   }
 }
-////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 void init_outs(){
     //memoria = EEPROM.read(0);
     digitalWrite(salida_1, bitRead(memoria, 0));
@@ -373,6 +387,11 @@ void show_IP(){
   String IPstring = var1 + var2 + var3;
   char APshowIP[45] = "";
   IPstring.toCharArray(APshowIP, 45);
+  //WiFi.softAPdisconnect(true);
+  //WiFi.mode(WIFI_OFF);
+  //delay(5000);
+  //WiFi.mode(WIFI_AP_STA);
   WiFi.softAPConfig(ip, gateway, subnet);
   WiFi.softAP(APshowIP, APpass);//cambia el nombre al AP
+  flag_1 = 1;
 }
