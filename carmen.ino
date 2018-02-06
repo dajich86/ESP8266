@@ -136,11 +136,9 @@ void setup(void){
 //////////////////////////////////////////////B O R R A R    D A T O S   P R E V I O S////////////////
 //WiFi.disconnect(); //will erase ssid/password segun tzapu autor de la libreria wifi manager//////////
 //////////////////////////////////////////////////////////////////////////////////////////////////////
-WiFi.hostname("reef-controller");
-//WiFi.softAPConfig(ip, gateway, subnet);
-//WiFi.mode(WIFI_AP_STA);  
+WiFi.hostname("reef-controller"); 
 WiFiManager wifiManager;
-wifiManager.autoConnect("REEF Setup (IP: 192.168.4.1)");// se desborda y no pone el nombre
+wifiManager.autoConnect("Setup (IP: 192.168.4.1)");// se desborda y no pone el nombre
 show_IP();
 
 
@@ -382,9 +380,6 @@ void show_IP(){
   String IPstring = var1 + var2 + var3;
   char APshowIP[45] = "";
   IPstring.toCharArray(APshowIP, 45);
-  //WiFi.softAPdisconnect(true);
-  //WiFi.mode(WIFI_OFF);
-  //delay(2000);
   WiFi.mode(WIFI_AP_STA);
   WiFi.softAPConfig(ip, gateway, subnet);
   WiFi.softAP(APshowIP, APpass);//cambia el nombre al AP
