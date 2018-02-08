@@ -4,7 +4,9 @@
 #include <WiFiManager.h>         //https://github.com/tzapu/WiFiManager
 #include <EasyDDNS.h>
 #include <EEPROM.h>
+#include <Ticker.h>
 
+Ticker timer;
 ESP8266WebServer server(80);
 
 String mainPage = "";
@@ -14,6 +16,7 @@ const char* www_username = "reefacuario";//sitio web protegido por usuario y pas
 const char* www_password = "qwerty";
 char memoria;
 char flag_1 = 0;
+ char show = 0;
 
 
 IPAddress ip(192,168,4,1);//este nombre puede ser cualquiera no es una funcion fija ip-IP-ipe-ip1 es del AP
@@ -292,6 +295,8 @@ setupPage += "</html>";
   //DDNS DuckDNS
   EasyDDNS.service("duckdns");    // Enter your DDNS Service Name - "duckdns" / "noip"
   EasyDDNS.client("dajich.duckdns.org","3c08f8d5-d76f-49ac-903a-67486cc1de61");    // Enter ddns Domain & Token | Example - "esp.duckdns.org","1234567"
+  
+  timer.attach (20, apaga_AP);//el AP aparece durante 20 segundos y despues se apaga para no crear conflicto de reconexion wifi, que pasa con AP encendido
 }
 ///////////////////////////////////////////////////////////L O O P////////////////////////////////////////////////////////////////////////// 
 void loop(void)
@@ -379,10 +384,13 @@ void show_IP(){
   String IPstring = var1 + var2 + var3;
   char APshowIP[45] = "";
   IPstring.toCharArray(APshowIP, 45);
-  WiFi.mode(WIFI_AP_STA);//conflicto de reconexion
+  WiFi.mode(WIFI_AP_STA);//El AP dura unos segundos al inicio para mostrar IP, despues se apaga y ya no hay conflicto de reconexion al Wifi
   WiFi.softAPConfig(ip, gateway, subnet);
   WiFi.softAP(APshowIP, APpass);//cambia el nombre al AP conflicto de reconexion
-  delay(30000);
-  WiFi.mode(WIFI_STA);//Se resolvio apagando el AP, solo dura unos segundos al inicio para mostrar IP, despues se apaga y ya no hay conflicto de reconexion al Wifi
 }
 
+void apaga_AP()
+{
+  WiFi.mode(WIFI_STA);
+  timer.detach();
+}
