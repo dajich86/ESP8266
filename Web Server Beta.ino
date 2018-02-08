@@ -9,15 +9,15 @@ ESP8266WebServer server(80);
 
 String mainPage = "";
 String setupPage = "";
-char APpass[] = "1234abcd";
+char APpass[] = "12345678";
 const char* www_username = "reefacuario";//sitio web protegido por usuario y password
 const char* www_password = "qwerty";
 char memoria;
 char flag_1 = 0;
 
 
-IPAddress ip(192,168,1,4);//este nombre puede ser cualquiera no es una funcion fija ip-IP-ipe-ip1 es del AP
-IPAddress gateway(192,168,11,1);
+IPAddress ip(192,168,4,1);//este nombre puede ser cualquiera no es una funcion fija ip-IP-ipe-ip1 es del AP
+IPAddress gateway(192,168,1,1);
 IPAddress subnet(255,255,255,0);
 
 int salida_1 = 16;
@@ -110,6 +110,7 @@ String page() {
 ////////////////////////////////////////////////////////////S E T U P///////////////////////////////////////////////////////////////////////////////////////////////////////
 void setup(void){
   EEPROM.begin(512);
+  Serial.begin(115200);
 
   pinMode(salida_1, OUTPUT);
   pinMode(salida_2, OUTPUT);
@@ -121,27 +122,24 @@ void setup(void){
   pinMode(salida_8, OUTPUT);
   pinMode(3, INPUT_PULLUP);//entrada de boton para borrar ejecutar WiFi.disconnect(); y borrar red guardada
 
-  if(digitalRead(3) == LOW )
+if(digitalRead(3) == LOW )
   {
-    WiFi.disconnect();//borra wifi guardada
+    //////////////////////////////////////////////B O R R A R    D A T O S   P R E V I O S////////////////
+    WiFi.disconnect();//will erase ssid/password segun tzapu autor de la libreria wifi manager////////////
+    //////////////////////////////////////////////////////////////////////////////////////////////////////
     EEPROM.write(0,0); //all on
     EEPROM.commit();
     delay(5000);
     while(digitalRead(3) == LOW);
     ESP.reset();
-  }
-  
-  memoria = EEPROM.read(0);
-  init_outs();
-//////////////////////////////////////////////B O R R A R    D A T O S   P R E V I O S////////////////
-//WiFi.disconnect(); //will erase ssid/password segun tzapu autor de la libreria wifi manager//////////
-//////////////////////////////////////////////////////////////////////////////////////////////////////
-WiFi.hostname("reef-controller");
-//WiFi.softAPConfig(ip, gateway, subnet);
-WiFi.mode(WIFI_AP_STA);  
-WiFiManager wifiManager;
-wifiManager.autoConnect("REEF Setup (IP: 192.168.4.1)");// se desborda y no pone el nombre
+}
+memoria = EEPROM.read(0);
+init_outs();
 
+WiFi.hostname("reef-controller");
+WiFiManager wifiManager;
+wifiManager.autoConnect("Setup (IP: 192.168.4.1)");// se desborda y no pone el nombre
+show_IP();
 
 setupPage += "<!DOCTYPE html>";
 setupPage += "<html lang='en'>";
@@ -300,12 +298,6 @@ void loop(void)
 {
   EasyDDNS.update(300000); // 1000 = 1 segundo
   server.handleClient();
-  
-  if(WiFi.status()==WL_CONNECTED)//con conexion wifi muestra nombre y la IP que se obtuvo
-  {
-    if(flag_1 == 0)
-      show_IP();
-  }
 }
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 void init_outs(){
@@ -381,17 +373,16 @@ void handleSave() {
 }
 
 void show_IP(){
-  String var1 ="REEF Controller (IP: ";
+  String var1 ="REEF (IP: ";
   String var2 = WiFi.localIP().toString();
   String var3 =")";
   String IPstring = var1 + var2 + var3;
   char APshowIP[45] = "";
   IPstring.toCharArray(APshowIP, 45);
-  //WiFi.softAPdisconnect(true);
-  //WiFi.mode(WIFI_OFF);
-  //delay(5000);
-  //WiFi.mode(WIFI_AP_STA);
+  WiFi.mode(WIFI_AP_STA);//conflicto de reconexion
   WiFi.softAPConfig(ip, gateway, subnet);
-  WiFi.softAP(APshowIP, APpass);//cambia el nombre al AP
-  flag_1 = 1;
+  WiFi.softAP(APshowIP, APpass);//cambia el nombre al AP conflicto de reconexion
+  delay(30000);
+  WiFi.mode(WIFI_STA);//Se resolvio apagando el AP, solo dura unos segundos al inicio para mostrar IP, despues se apaga y ya no hay conflicto de reconexion al Wifi
 }
+
