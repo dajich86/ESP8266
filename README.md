@@ -7,3 +7,5 @@ Librerias para Arduino
 -Easy DDNS by Ayush Sharma
 
 -Ultima version para multicontacto es de 8 salidas matrix
+
+-https://dl.espressif.com/dl/package_esp32_index.json tarjeta esp32 de espressif systems
