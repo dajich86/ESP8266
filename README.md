@@ -5,3 +5,5 @@ Librerias para Arduino
 -Wifi Manager by tzapu
 
 -Easy DDNS by Ayush Sharma
+
+-Ultima version para multicontacto es de 8 salidas matrix
