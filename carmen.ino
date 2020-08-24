@@ -30,8 +30,8 @@ int salida_7 = 12;
 int salida_8 = 13;
 
 //pagina
-const char HTTP_PAGE1[] PROGMEM = "<!DOCTYPE html><html lang='en'><head><title>REEF Controller</title><meta charset='utf-8'><meta name='viewport' content='width=device-width, initial-scale=1'><link href='https://maxcdn.bootstrapcdn.com/bootswatch/3.3.7/darkly/bootstrap.min.css' rel='stylesheet'><script src='https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js'></script><script src='https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js'></script></head><body>";
-const char HTTP_DATA1[] PROGMEM = "<div class= 'well'><h1 class ='text-center'>REEF Controller</h1> <hr><h3 class ='text-left'>Salidas</h3>  <div class='btn-group-vertical'><div class='btn-group'>";
+const char HTTP_PAGE1[] PROGMEM = "<!DOCTYPE html><html lang='en'><head><title>OMNI Controller</title><meta charset='utf-8'><meta name='viewport' content='width=device-width, initial-scale=1'><link href='https://maxcdn.bootstrapcdn.com/bootswatch/3.3.7/darkly/bootstrap.min.css' rel='stylesheet'><script src='https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js'></script><script src='https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js'></script></head><body>";
+const char HTTP_DATA1[] PROGMEM = "<div class= 'well'><h1 class ='text-center'>OMNI Controller</h1> <hr><h3 class ='text-left'>Salidas</h3>  <div class='btn-group-vertical'><div class='btn-group'>";
 
 const char HTTP_BUTTON1_ON[] PROGMEM = "<a href=\'socket1Off\'><button type='button' class='btn btn-lg btn-success'>1</button>&nbsp;&nbsp;&nbsp;</a>";
 const char HTTP_BUTTON1_OFF[] PROGMEM = "<a href=\'socket1On\'><button type='button' class='btn btn-lg btn-danger'>1</button>&nbsp;&nbsp;&nbsp;</a>";
@@ -56,7 +56,7 @@ const char HTTP_BUTTON8_OFF[] PROGMEM = "<a href=\'socket8On\'><button type='but
 const char HTTP_DATA3[] PROGMEM = "</div></div><hr>";
 
 const char HTTP_BUTTON_ALL_OFF[] PROGMEM = "<a href=\'allOff\'><button type='button' class='btn btn-danger btn-lg btn-block'>Apagar todas las salidas</button></a>";
-const char HTTP_SITIO[] PROGMEM = "<hr><h4 class='text-center'>www.reefacuario.com</h4><hr>";
+//const char HTTP_SITIO[] PROGMEM = "<hr><h4 class='text-center'>www.reefacuario.com</h4><hr>";
 const char HTTP_BUTTON_DNS[] PROGMEM = "<a href=\'setup\'><button type='button' class='btn btn-default btn-lg btn-block'>Configurar DNS</button></a>";
 const char HTTP_END1[] PROGMEM = "</div></body></html>";
 
@@ -100,7 +100,8 @@ String page() {
     else if(bitRead(memoria,7) == 1){content += FPSTR(HTTP_BUTTON8_OFF);}
     content += FPSTR(HTTP_DATA3);
     content += FPSTR(HTTP_BUTTON_ALL_OFF);
-    content += FPSTR(HTTP_SITIO);
+    content += FPSTR(HTTP_DATA3);
+    //content += FPSTR(HTTP_SITIO);
     content += FPSTR(HTTP_BUTTON_DNS);
     content += FPSTR(HTTP_END1);
     return content;
@@ -136,7 +137,7 @@ void setup(void){
 //////////////////////////////////////////////B O R R A R    D A T O S   P R E V I O S////////////////
 //WiFi.disconnect(); //will erase ssid/password segun tzapu autor de la libreria wifi manager//////////
 //////////////////////////////////////////////////////////////////////////////////////////////////////
-WiFi.hostname("reef-controller"); 
+WiFi.hostname("omni-controller"); 
 WiFiManager wifiManager;
 wifiManager.autoConnect("Setup (IP: 192.168.4.1)");// se desborda y no pone el nombre
 show_IP();
@@ -145,7 +146,7 @@ show_IP();
 setupPage += "<!DOCTYPE html>";
 setupPage += "<html lang='en'>";
 setupPage += "<head>";
-setupPage += "  <title>REEF Controller</title>";
+setupPage += "  <title>OMNI Controller</title>";
 setupPage += "  <meta charset='utf-8'>";
 setupPage += "  <meta name='viewport' content='width=device-width, initial-scale=1'>";
 setupPage += "  <link href='https://maxcdn.bootstrapcdn.com/bootswatch/3.3.7/darkly/bootstrap.min.css' rel='stylesheet'>        ";
@@ -374,7 +375,7 @@ void handleSave() {
 }
 
 void show_IP(){
-  String var1 ="REEF (IP: ";
+  String var1 ="OMNI (IP: ";
   String var2 = WiFi.localIP().toString();
   String var3 =")";
   String IPstring = var1 + var2 + var3;
